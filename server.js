@@ -6,12 +6,10 @@ const Entry = require('./Models/Schema');
 
 const app = express();
 
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 
-// MongoDB Connection
 mongoose.connect("mongodb+srv://sanjanarach7:miniprj@cluster0.jqwqmc0.mongodb.net/miniprj?retryWrites=true&w=majority")
     .then(() => {
         console.log('MongoDB connection success');
@@ -24,7 +22,6 @@ const USER_ID = "Sanjana7";
 const EMAIL = "sanjana_racharla@srmap.edu.in";
 const ROLL_NUMBER = "AP21110010668";
 
-//post Method
 app.post('/bfhl', async (req, res) => {
     try {
         console.log('Received request body:', req.body); 
@@ -40,20 +37,20 @@ app.post('/bfhl', async (req, res) => {
                 roll_number: ROLL_NUMBER,
                 numbers: [],
                 alphabets: [],
-                highest_alphabet: []
+                highest_lowercase: []
             });
         }
 
         const numbers = data.filter(item => !isNaN(item));
         const alphabets = data.filter(item => isNaN(item));
-        const highestAlphabet = alphabets.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())).pop();
+        const lowercaseAlphabets = alphabets.filter(item => /^[a-z]$/.test(item)); 
+        const highestLowercase = lowercaseAlphabets.sort().pop(); 
 
-        
         const entry = new Entry({
             data,
             numbers,
             alphabets,
-            highest_alphabet: highestAlphabet ? [highestAlphabet] : []
+            highest_lowercase: highestLowercase ? [highestLowercase] : []
         });
 
         await entry.save();
@@ -65,7 +62,7 @@ app.post('/bfhl', async (req, res) => {
             roll_number: ROLL_NUMBER,
             numbers: numbers,
             alphabets: alphabets,
-            highest_alphabet: highestAlphabet ? [highestAlphabet] : []
+            highest_lowercase: highestLowercase ? [highestLowercase] : []
         });
     } catch (error) {
         console.error('Error processing request:', error);
@@ -76,12 +73,12 @@ app.post('/bfhl', async (req, res) => {
             roll_number: ROLL_NUMBER,
             numbers: [],
             alphabets: [],
-            highest_alphabet: []
+            highest_lowercase: []
         });
     }
 });
 
-//Get Method
+// GET Method
 app.get('/bfhl', (req, res) => {
     res.status(200).json({
         operation_code: 1
